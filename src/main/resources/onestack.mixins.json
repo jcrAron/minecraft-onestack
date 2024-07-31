@@ -13,6 +13,8 @@
         "core.server.ServerGamePacketListenerImplMixin",
         "patch.vanilla.BowlFoodItemMixin",
         "patch.vanilla.BucketItemMixin",
+        "patch.vanilla.MilkBucketItemMixin",
+        "patch.vanilla.SolidBucketItemMixin",
         "patch.vanilla.AbstractContainerMenuMixin"
     ],
     "client": [
