@@ -27,7 +27,6 @@ replay_pid*
 # run
 run/
 run-data/
-gradle/
 build/
 bin/
 .settings/
@@ -36,5 +35,3 @@ bin/
 .classpath
 .project
 *.launch
-gradlew
-gradlew.bat
