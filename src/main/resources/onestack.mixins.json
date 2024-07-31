@@ -1,0 +1,24 @@
+{
+    "required": true,
+    "package": "net.jcraron.mc.onestack.mixin",
+    "compatibilityLevel": "JAVA_17",
+    "minVersion": "0.8.5",
+    "refmap": "onestack.refmap.json",
+    "plugin": "net.jcraron.mc.onestack.mixin.MixinPlugin",
+    "mixins": [
+        "core.server.ContainerMixin",
+        "core.server.ItemStackMixin",
+        "core.server.FriendlyByteBufMixin",
+        "core.server.ContainersMixin",
+        "core.server.ServerGamePacketListenerImplMixin",
+        "patch.vanilla.BowlFoodItemMixin",
+        "patch.vanilla.BucketItemMixin",
+        "patch.vanilla.AbstractContainerMenuMixin"
+    ],
+    "client": [
+        "core.client.GuiGraphicsMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}
