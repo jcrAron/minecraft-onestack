@@ -1,5 +1,6 @@
 package net.jcraron.mc.onestack.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -39,12 +40,16 @@ public class FileConfigDefine {
 
 	static {
 		Builder ROOT = new ForgeConfigSpec.Builder();
-		ITEM_LIST = ROOT
-				.comment(
-						" 1 <= maxCount <= " + Integer.MAX_VALUE)
-				.defineListAllowEmpty("item", () -> List.of(createConfig(Items.COBBLESTONE, Integer.MAX_VALUE),
-						createConfig(Items.NETHERRACK, Integer.MAX_VALUE)), FileConfigDefine::elementValidator);
+		ITEM_LIST = ROOT.comment(" 1 <= maxCount <= " + Integer.MAX_VALUE).defineListAllowEmpty("item",
+				FileConfigDefine::createDefaultItemList, FileConfigDefine::elementValidator);
 		ROOT_SPEC = ROOT.build();
+	}
+
+	private static List<Config> createDefaultItemList() {
+		List<Config> list = new ArrayList<>();
+		list.add(createConfig(Items.COBBLESTONE, Integer.MAX_VALUE));
+		list.add(createConfig(Items.NETHERRACK, Integer.MAX_VALUE));
+		return list;
 	}
 
 	public static void register() {
