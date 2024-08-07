@@ -2,7 +2,7 @@ package net.jcraron.mc.onestack.network;
 
 import java.util.function.Supplier;
 
-import net.jcraron.mc.onestack.OneStackMod;
+import net.jcraron.mc.onestack.api.MaxCountConfig;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -37,7 +37,7 @@ public class SendSetMaxCount {
 	}
 
 	private void receive(SetMaxCount config, Supplier<NetworkEvent.Context> contextSupplier) {
-		OneStackMod.setMaxCount(config.item(), config.count());
+		MaxCountConfig.setMaxCount(config.item(), config.count());
 		contextSupplier.get().setPacketHandled(true);
 	}
 }

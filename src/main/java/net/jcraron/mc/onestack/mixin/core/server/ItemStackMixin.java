@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.jcraron.mc.onestack.OneStackMod;
+import net.jcraron.mc.onestack.api.MaxCountConfig;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
@@ -54,7 +54,7 @@ public class ItemStackMixin {
 
 	@Inject(method = "getMaxStackSize()I", at = @At("HEAD"), cancellable = true)
 	public void getMaxStackSize(CallbackInfoReturnable<Integer> info) {
-		int maxCount = OneStackMod.getMaxCount((ItemStack) (Object) this);
+		int maxCount = MaxCountConfig.getMaxCount((ItemStack) (Object) this);
 		if (maxCount > 0) {
 			info.setReturnValue(Math.max(this.count, maxCount));
 		}
