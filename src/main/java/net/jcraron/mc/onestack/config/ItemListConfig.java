@@ -33,10 +33,11 @@ public class ItemListConfig implements ConfigHandle {
 		return itemMap.get(itemstack.getItem());
 	}
 
-	public void setMaxCount(Item item, int value) {
+	/** @param value remove the config when value is null */
+	public void setMaxCount(Item item, Integer value) {
 		@SuppressWarnings("unchecked")
 		List<Config> items = (List<Config>) ITEM_LIST.get();
-		if (value == MaxCountValue.JAVA_VALUE_DEFAULT || !MaxCountValue.INSTANCE.isVaildJsonValue(value)) {
+		if (value == null || !MaxCountValue.INSTANCE.isVaildJsonValue(value)) {
 			items.removeIf((config) -> getItemByName(config.get(KEY_ITEM_NAME)) == item);
 		} else {
 			boolean replace = false;

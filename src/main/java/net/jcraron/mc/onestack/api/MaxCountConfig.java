@@ -38,8 +38,10 @@ public class MaxCountConfig {
 
 	/**
 	 * Set max count of specific item. this priority is higher than CommonMaxCount.
+	 * 
+	 * @param value is null will delete this config
 	 */
-	public static void setMaxCount(Item item, int value) {
+	public static void setMaxCount(Item item, Integer value) {
 		RootConfig.INSTANCE.ITEMS_CONFIG.setMaxCount(item, value);
 	}
 
