@@ -1,4 +1,4 @@
-package net.jcraron.mc.onestack.network;
+package net.jcraron.mc.onestack.config;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Optional;

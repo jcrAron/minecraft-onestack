@@ -2,6 +2,7 @@ package net.jcraron.mc.onestack.api;
 
 import net.jcraron.mc.onestack.config.RootConfig;
 import net.jcraron.mc.onestack.config.value.MaxCountValue;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -33,6 +34,9 @@ public class MaxCountConfig {
 
 	/** Set max count of common item that original max count greater than 1. */
 	public static void setCommonMaxCount(int value) {
+		if (!Minecraft.getInstance().isLocalServer()) {
+			return;
+		}
 		RootConfig.INSTANCE.DEFAULT_CONFIG.getCommonMaxCount().set(value);
 	}
 
@@ -42,6 +46,9 @@ public class MaxCountConfig {
 	 * @param value is null will delete this config
 	 */
 	public static void setMaxCount(Item item, Integer value) {
+		if (!Minecraft.getInstance().isLocalServer()) {
+			return;
+		}
 		RootConfig.INSTANCE.ITEMS_CONFIG.setMaxCount(item, value);
 	}
 
@@ -49,6 +56,9 @@ public class MaxCountConfig {
 	@SuppressWarnings("unused")
 	@Deprecated
 	private static void setMaxCount(Item item, String[] withTag, int value, int priority) {
+		if (!Minecraft.getInstance().isLocalServer()) {
+			return;
+		}
 		setMaxCount(item, value);
 	}
 }

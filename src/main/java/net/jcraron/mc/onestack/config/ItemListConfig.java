@@ -4,16 +4,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import com.electronwill.nightconfig.core.Config;
 
 import net.jcraron.mc.onestack.config.value.MaxCountValue;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.Builder;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class ItemListConfig implements ConfigHandle {
@@ -124,4 +128,28 @@ public class ItemListConfig implements ConfigHandle {
 		return ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemLocation));
 	}
 
+	private static record SingleConfigEntry(Item item, int count) {
+		private static void writeToBuffer(SingleConfigEntry config, FriendlyByteBuf buffer) {
+			String itemName = ForgeRegistries.ITEMS.getKey(config.item()).toString();
+			buffer.writeUtf(itemName);
+			buffer.writeInt(config.count());
+		}
+
+		private static SingleConfigEntry readFromBuffer(FriendlyByteBuf buffer) {
+			String itemName = buffer.readUtf();
+			int count = buffer.readInt();
+			Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName));
+			return new SingleConfigEntry(item, count);
+		}
+	}
+
+	public void registerToChannel(SimpleChannel channel, int messageIndex) {
+		channel.registerMessage(messageIndex, SingleConfigEntry.class, SingleConfigEntry::writeToBuffer,
+				SingleConfigEntry::readFromBuffer, this::receive);
+	}
+
+	private void receive(SingleConfigEntry config, Supplier<NetworkEvent.Context> contextSupplier) {
+		this.setMaxCount(config.item(), config.count());
+		contextSupplier.get().setPacketHandled(true);
+	}
 }
