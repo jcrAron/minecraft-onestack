@@ -36,7 +36,7 @@ public class RootConfig {
 	public RootConfig() {
 		Builder ROOT = new ForgeConfigSpec.Builder();
 		ITEMS_CONFIG = new ItemListConfig(this::saveFile);
-		ITEMS_CONFIG.registerTo(ROOT, List.of("item"));
+		ITEMS_CONFIG.registerTo(ROOT, List.of("items"));
 		ITEMS_CONFIG.registerToChannel(CONFIG_CHANNEL, 1);
 		ROOT_SPEC = ROOT.build();
 		ConfigSync.INSTANCE.registerToChannel(CONFIG_CHANNEL, 0);
