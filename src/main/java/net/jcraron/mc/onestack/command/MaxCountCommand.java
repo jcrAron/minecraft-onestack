@@ -1,4 +1,4 @@
-package net.jcraron.mc.onestack;
+package net.jcraron.mc.onestack.command;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -19,9 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
-@Mod.EventBusSubscriber(modid = OneStackMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class MaxCountCommand {
 	@SubscribeEvent
 	public static void registerCommands(RegisterCommandsEvent event) {

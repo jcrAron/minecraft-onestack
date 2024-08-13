@@ -24,7 +24,6 @@ import net.minecraftforge.common.ForgeConfigSpec.Builder;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class ItemListConfig implements ConfigHandle {
@@ -51,7 +50,6 @@ public class ItemListConfig implements ConfigHandle {
 			return cacheResult;
 		}
 		EntryValue itemValue = entries.get(EntryKey.of(item));
-		
 		EntryValue tagValue = itemstack.getTags()
 				.map(EntryKey::of).filter(entries::containsKey).map(entries::get)
 				.max((v1, v2) -> Integer.compare(v1.getPriority(), v2.getPriority())).orElse(null);

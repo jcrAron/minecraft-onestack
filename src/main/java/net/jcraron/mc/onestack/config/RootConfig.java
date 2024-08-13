@@ -14,7 +14,6 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.Builder;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ConfigTracker;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
@@ -23,7 +22,6 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
-@Mod.EventBusSubscriber(modid = OneStackMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class RootConfig {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public final static RootConfig INSTANCE = new RootConfig();
@@ -44,7 +42,7 @@ public class RootConfig {
 		ConfigSync.INSTANCE.registerToChannel(CONFIG_CHANNEL, 0);
 	}
 
-	public static void register() {
+	public static void registerConfig() {
 		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, RootConfig.INSTANCE.ROOT_SPEC);
 	}
 
