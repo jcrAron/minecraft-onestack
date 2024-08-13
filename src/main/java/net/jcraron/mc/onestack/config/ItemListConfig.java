@@ -2,87 +2,149 @@ package net.jcraron.mc.onestack.config;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
 import com.electronwill.nightconfig.core.Config;
 
+import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle;
+import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle.Entry;
+import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle.EntryKey;
+import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle.EntryValue;
 import net.jcraron.mc.onestack.config.value.MaxCountValue;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.Minecraft;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.Builder;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class ItemListConfig implements ConfigHandle {
 
-	private static final String KEY_ITEM_NAME = "itemName";
-	private static final String KEY_MAX_COUNT = "maxCount";
-
 	private ForgeConfigSpec.ConfigValue<List<? extends Config>> ITEM_LIST;
-	private Map<Item, Integer> itemMap;
+	private Map<Item, Integer> cache;
+	private Map<EntryKey, EntryValue> entries;
+	private SimpleChannel channel;
+	private Runnable saveFile;
 
-	public ItemListConfig() {
-		this.itemMap = new HashMap<>();
+	public ItemListConfig(Runnable saveFile) {
+		this.entries = new HashMap<>();
+		this.cache = new HashMap<>();
+		this.saveFile = saveFile;
 	}
 
-	/** @return null if not setting */
-	public Integer getMaxCount(ItemStack itemstack) {
-		return itemMap.get(itemstack.getItem());
+	/**
+	 * @return -1 means applying the max count defined by{@link Item#getMaxStackSize(ItemStack)}
+	 */
+	public int getMaxCount(ItemStack itemstack) {
+		Item item = itemstack.getItem();
+		Integer cacheResult = cache.get(item);
+		if (cacheResult != null) {
+			return cacheResult;
+		}
+		EntryValue itemValue = entries.get(EntryKey.of(item));
+		
+		EntryValue tagValue = itemstack.getTags()
+				.map(EntryKey::of).filter(entries::containsKey).map(entries::get)
+				.max((v1, v2) -> Integer.compare(v1.getPriority(), v2.getPriority())).orElse(null);
+		int result = MaxCountValue.JAVA_VALUE_DEFAULT;
+		if (itemValue != null && tagValue != null) {
+			result = itemValue.getPriority() > tagValue.getPriority() ? itemValue.getCount() : tagValue.getCount();
+		} else if (itemValue != null ^ tagValue != null) {
+			result = itemValue != null ? itemValue.getCount() : tagValue.getCount();
+		}
+		cache.put(item, result);
+		return result;
 	}
 
-	/** @param value remove the config when value is null */
-	public void setMaxCount(Item item, Integer value) {
+	public void setMaxCount(Entry entry) {
+		if (!Minecraft.getInstance().isLocalServer()) {
+			channel.sendToServer(entry);
+			return;
+		} else {
+			rawSetConfig(entry);
+			for (ServerPlayer serverPlayer : ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers()) {
+				channel.send(PacketDistributor.PLAYER.with(() -> serverPlayer), entry);
+			}
+		}
+	}
+
+	private void rawSetConfig(Entry entry) {
 		@SuppressWarnings("unchecked")
 		List<Config> items = (List<Config>) ITEM_LIST.get();
-		if (value == null || !MaxCountValue.INSTANCE.isVaildJsonValue(value)) {
-			items.removeIf((config) -> getItemByName(config.get(KEY_ITEM_NAME)) == item);
+		if (entry.getValue() == null) {
+			items.removeIf((config) -> MaxCountEntryHandle.INSTANCE.toObject(config).getKey().equals(entry.getKey()));
 		} else {
 			boolean replace = false;
-			for (Config config : items) {
-				if (getItemByName(config.get(KEY_ITEM_NAME)) == item) {
-					config.set(KEY_MAX_COUNT, MaxCountValue.INSTANCE.toJsonValue(value));
-					replace = true;
+			Config newConfig = MaxCountEntryHandle.INSTANCE.toJsonValue(entry);
+			for (Iterator<Config> it = items.iterator(); it.hasNext();) {
+				Config config = it.next();
+				if (MaxCountEntryHandle.INSTANCE.toObject(config).getKey().equals(entry.getKey())) {
+					if (!replace) {
+						config.clear();
+						config.putAll(newConfig);
+						replace = true;
+					} else {
+						it.remove();
+					}
 				}
 			}
 			if (!replace) {
-				items.add(createItemConfig(item, value));
+				items.add(newConfig);
 			}
 		}
-		setCacheMaxCount(item, value);
-		// TODO save
+		set2Entries(entry);
+		saveFile.run();
 	}
 
 	@Override
 	public void registerTo(Builder builder, List<String> path) {
-		ITEM_LIST = builder.defineListAllowEmpty(path, ItemListConfig::createDefaultItemList,
+		String key_maxcount = String.format("%s can be \"max\" or \"default\" or positive integer (1~%d)",
+				MaxCountEntryHandle.KEY_MAX_COUNT, MaxCountValue.JAVA_VALUE_MAX);
+		String key_priority = String.format("The larger the number \"priority\", the higher the priority.",
+				MaxCountEntryHandle.KEY_PRIORITY);
+		ITEM_LIST = builder.comment(key_maxcount, key_priority).defineListAllowEmpty(path,
+				ItemListConfig::createDefaultItemList,
 				ItemListConfig::validator);
 	}
 
-	private void loadEntry(Config config) {
-		String itemLocation = config.get(KEY_ITEM_NAME);
-		Object maxCount = config.get(KEY_MAX_COUNT);
-		setCacheMaxCount(getItemByName(itemLocation), MaxCountValue.INSTANCE.toObject(maxCount));
-	}
-
-	private void setCacheMaxCount(Item item, int maxCount) {
-		if (maxCount >= 1) {
-			itemMap.put(item, maxCount);
+	private void set2Entries(Entry entry) {
+		cache.clear();
+		if (entry.getValue() == null) {
+			entries.remove(entry.getKey());
 		} else {
-			itemMap.remove(item);
+			entries.put(entry.getKey(), entry.getValue());
 		}
 	}
 
 	@Override
 	public void load() {
-		itemMap.clear();
-		ITEM_LIST.get().stream().forEach(this::loadEntry);
+		cache.clear();
+		entries.clear();
+		boolean hasRepeat = false;
+		@SuppressWarnings("unchecked")
+		List<Config> items = (List<Config>) ITEM_LIST.get();
+		for (Iterator<Config> it = items.iterator(); it.hasNext();) {
+			Config config = it.next();
+			Entry entry = MaxCountEntryHandle.INSTANCE.toObject(config);
+			if (entries.containsKey(entry.getKey())) {
+				it.remove();
+				hasRepeat = true;
+			} else {
+				set2Entries(entry);
+			}
+		}
+		if (hasRepeat) {
+			saveFile.run();
+		}
 
 	}
 
@@ -101,55 +163,28 @@ public class ItemListConfig implements ConfigHandle {
 	}
 
 	private static Config createItemConfig(Item item, Object jsonMaxCount) {
-//		MaxCountValue.checkValid(maxCount);
-		Config config = Config.inMemory();
-		String itemLocation = ForgeRegistries.ITEMS.getKey(item).toString();
-		config.set(KEY_ITEM_NAME, itemLocation);
-		config.set(KEY_MAX_COUNT, jsonMaxCount);
-		return config;
+		Entry entry = Entry.of(item, MaxCountValue.INSTANCE.toObject(jsonMaxCount),
+				MaxCountEntryHandle.DEFAULT_PRIORITY_ITEM);
+		return MaxCountEntryHandle.INSTANCE.toJsonValue(entry);
 	}
 
 	private static boolean validator(Object object) {
 		if (!(object instanceof Config)) {
 			return false;
 		}
-		Config config = (Config) object;
-		if (!config.contains(KEY_ITEM_NAME) || !(config.get(KEY_ITEM_NAME) instanceof String itemName)
-				|| !ForgeRegistries.ITEMS.containsKey(new ResourceLocation(itemName))) {
-			return false;
-		}
-		if (!config.contains(KEY_MAX_COUNT) || !MaxCountValue.INSTANCE.isVaildJsonValue(config.get(KEY_MAX_COUNT))) {
-			return false;
-		}
-		return true;
-	}
-
-	private Item getItemByName(String itemLocation) {
-		return ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemLocation));
-	}
-
-	private static record SingleConfigEntry(Item item, int count) {
-		private static void writeToBuffer(SingleConfigEntry config, FriendlyByteBuf buffer) {
-			String itemName = ForgeRegistries.ITEMS.getKey(config.item()).toString();
-			buffer.writeUtf(itemName);
-			buffer.writeInt(config.count());
-		}
-
-		private static SingleConfigEntry readFromBuffer(FriendlyByteBuf buffer) {
-			String itemName = buffer.readUtf();
-			int count = buffer.readInt();
-			Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName));
-			return new SingleConfigEntry(item, count);
-		}
+		return MaxCountEntryHandle.INSTANCE.isVaildJsonValue((Config) object);
 	}
 
 	public void registerToChannel(SimpleChannel channel, int messageIndex) {
-		channel.registerMessage(messageIndex, SingleConfigEntry.class, SingleConfigEntry::writeToBuffer,
-				SingleConfigEntry::readFromBuffer, this::receive);
+		channel.registerMessage(messageIndex, Entry.class, Entry::writeToBuffer, Entry::readFromBuffer, this::receive);
+		this.channel = channel;
 	}
 
-	private void receive(SingleConfigEntry config, Supplier<NetworkEvent.Context> contextSupplier) {
-		this.setMaxCount(config.item(), config.count());
+	private void receive(Entry entry, Supplier<NetworkEvent.Context> contextSupplier) {
+		if (Minecraft.getInstance().isLocalServer()) {
+			this.rawSetConfig(entry);
+		}
 		contextSupplier.get().setPacketHandled(true);
 	}
+
 }

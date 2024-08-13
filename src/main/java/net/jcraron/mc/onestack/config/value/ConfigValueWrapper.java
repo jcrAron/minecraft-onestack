@@ -3,8 +3,7 @@ package net.jcraron.mc.onestack.config.value;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 
 /**
- * @param <JSON> Type of
- *               {@link net.minecraftforge.common.ForgeConfigSpec.ConfigValue}
+ * @param <JSON> Type of {@link net.minecraftforge.common.ForgeConfigSpec.ConfigValue}
  */
 public class ConfigValueWrapper<CLASS, JSON> extends ValueWrapper<CLASS, JSON> {
 	private ConfigValue<JSON> config;

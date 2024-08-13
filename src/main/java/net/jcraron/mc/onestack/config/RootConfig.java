@@ -27,20 +27,17 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 public class RootConfig {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public final static RootConfig INSTANCE = new RootConfig();
-	public final DefaultConfig DEFAULT_CONFIG;
 	public final ItemListConfig ITEMS_CONFIG;
 	private final ForgeConfigSpec ROOT_SPEC;
 
-	private final String PROTOCOL_VERSION = "1";
+	private final String PROTOCOL_VERSION = "2.0.0";
 	private final SimpleChannel CONFIG_CHANNEL = NetworkRegistry.newSimpleChannel(
 			new ResourceLocation(OneStackMod.MODID, "syncconfig"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals,
 			PROTOCOL_VERSION::equals);
 
 	public RootConfig() {
 		Builder ROOT = new ForgeConfigSpec.Builder();
-		DEFAULT_CONFIG = new DefaultConfig();
-		DEFAULT_CONFIG.registerTo(ROOT, List.of("common"));
-		ITEMS_CONFIG = new ItemListConfig();
+		ITEMS_CONFIG = new ItemListConfig(this::saveFile);
 		ITEMS_CONFIG.registerTo(ROOT, List.of("item"));
 		ITEMS_CONFIG.registerToChannel(CONFIG_CHANNEL, 1);
 		ROOT_SPEC = ROOT.build();
@@ -53,21 +50,18 @@ public class RootConfig {
 
 	@SubscribeEvent
 	static void onLoading(final ModConfigEvent.Loading event) {
-		RootConfig.INSTANCE.DEFAULT_CONFIG.load();
 		RootConfig.INSTANCE.ITEMS_CONFIG.load();
 		RootConfig.INSTANCE.syncToClient();
 	}
 
 	@SubscribeEvent
 	static void onReload(final ModConfigEvent.Reloading event) {
-		RootConfig.INSTANCE.DEFAULT_CONFIG.reload();
 		RootConfig.INSTANCE.ITEMS_CONFIG.reload();
 		RootConfig.INSTANCE.syncToClient();
 	}
 
-	public void save() {
+	public void saveFile() {
 		ROOT_SPEC.save();
-		syncToClient();
 	}
 
 	public void syncToClient() {

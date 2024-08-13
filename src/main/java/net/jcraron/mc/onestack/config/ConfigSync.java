@@ -29,7 +29,9 @@ public class ConfigSync {
 			return new SingleConfig(filename, bytes);
 		}
 	}
+
 	private final ConfigTracker tracker;
+
 	private ConfigSync() {
 		tracker = ConfigTracker.INSTANCE;
 	}
@@ -53,15 +55,10 @@ public class ConfigSync {
 	}
 
 	private void receiveSyncedConfig(SingleConfig config, Supplier<NetworkEvent.Context> contextSupplier) {
-		loadConfig(config);
-		contextSupplier.get().setPacketHandled(true);
-	}
-
-	/** @param tracker ConfigTracker.INSTANCE */
-	private void loadConfig(SingleConfig config) {
 		if (!Minecraft.getInstance().isLocalServer()) {
 			Optional.ofNullable(tracker.fileMap().get(config.filename()))
 					.ifPresent(mc -> mc.acceptSyncedConfig(config.data()));
 		}
+		contextSupplier.get().setPacketHandled(true);
 	}
 }
