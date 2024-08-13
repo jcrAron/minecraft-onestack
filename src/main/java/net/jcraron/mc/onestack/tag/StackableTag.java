@@ -13,7 +13,7 @@ import net.minecraft.world.item.Item;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-public class AppendStackableTag {
+public class StackableTag {
 	public final static TagKey<Item> TAG_STACKABLE = ItemTags.create(new ResourceLocation("forge", "stackable"));
 
 	@SuppressWarnings("deprecation")

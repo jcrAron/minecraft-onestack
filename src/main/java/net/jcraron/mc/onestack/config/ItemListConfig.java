@@ -14,8 +14,10 @@ import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle.Entry;
 import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle.EntryKey;
 import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle.EntryValue;
 import net.jcraron.mc.onestack.config.value.MaxCountValue;
+import net.jcraron.mc.onestack.tag.StackableTag;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -153,6 +155,7 @@ public class ItemListConfig implements ConfigHandle {
 
 	private static List<Config> createDefaultItemList() {
 		List<Config> list = new ArrayList<>();
+		list.add(createItemConfig(StackableTag.TAG_STACKABLE, MaxCountValue.CONFIG_VALUE_DEFAULT));
 		list.add(createItemConfig(Items.POTION, MaxCountValue.CONFIG_VALUE_MAX));
 		list.add(createItemConfig(Items.LINGERING_POTION, MaxCountValue.CONFIG_VALUE_MAX));
 		list.add(createItemConfig(Items.SPLASH_POTION, MaxCountValue.CONFIG_VALUE_MAX));
@@ -163,6 +166,12 @@ public class ItemListConfig implements ConfigHandle {
 	private static Config createItemConfig(Item item, Object jsonMaxCount) {
 		Entry entry = Entry.of(item, MaxCountValue.INSTANCE.toObject(jsonMaxCount),
 				MaxCountEntryHandle.DEFAULT_PRIORITY_ITEM);
+		return MaxCountEntryHandle.INSTANCE.toJsonValue(entry);
+	}
+
+	private static Config createItemConfig(TagKey<Item> tag, Object jsonMaxCount) {
+		Entry entry = Entry.of(tag, MaxCountValue.INSTANCE.toObject(jsonMaxCount),
+				MaxCountEntryHandle.DEFAULT_PRIORITY_TAG);
 		return MaxCountEntryHandle.INSTANCE.toJsonValue(entry);
 	}
 
