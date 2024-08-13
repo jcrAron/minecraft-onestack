@@ -14,13 +14,14 @@ import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class AppendStackableTag {
+	public final static TagKey<Item> TAG_STACKABLE = ItemTags.create(new ResourceLocation("forge", "stackable"));
+
 	@SuppressWarnings("deprecation")
 	@SubscribeEvent
 	public static void appendStackableTag(TagsUpdatedEvent event) {
 		Registry<Item> itemsRegistry = event.getRegistryAccess().registry(Registries.ITEM).get();
-		TagKey<Item> key = ItemTags.create(new ResourceLocation("forge", "stackable"));
 		List<Holder<Item>> list = itemsRegistry.stream().filter(item -> item.getMaxStackSize() > 1)
 				.map(Item::builtInRegistryHolder).collect(Collectors.toList());
-		itemsRegistry.getOrCreateTag(key).bind(list);;
+		itemsRegistry.getOrCreateTag(TAG_STACKABLE).bind(list);
 	}
 }
