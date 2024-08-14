@@ -41,9 +41,6 @@ public class MaxCountConfig {
 	 * @see MaxCountConfig#set(TagKey, int, int)
 	 */
 	public static void set(Item item, int value, int priority) {
-		if (!Minecraft.getInstance().isLocalServer()) {
-			return;
-		}
 		RootConfig.INSTANCE.ITEMS_CONFIG.setMaxCount(Entry.of(item, value, priority));
 	}
 
@@ -57,9 +54,6 @@ public class MaxCountConfig {
 	 * @see MaxCountConfig#set(Item, int, int)
 	 */
 	public static void set(TagKey<Item> tag, int value, int priority) {
-		if (!Minecraft.getInstance().isLocalServer()) {
-			return;
-		}
 		RootConfig.INSTANCE.ITEMS_CONFIG.setMaxCount(Entry.of(tag, value, priority));
 	}
 
@@ -69,9 +63,6 @@ public class MaxCountConfig {
 	 * @see MaxCountConfig#unset(TagKey)
 	 */
 	public static void unset(Item item) {
-		if (!Minecraft.getInstance().isLocalServer()) {
-			return;
-		}
 		RootConfig.INSTANCE.ITEMS_CONFIG.setMaxCount(Entry.of(item));
 	}
 
@@ -81,9 +72,6 @@ public class MaxCountConfig {
 	 * @see MaxCountConfig#unset(Item)
 	 */
 	public static void unset(TagKey<Item> tag) {
-		if (!Minecraft.getInstance().isLocalServer()) {
-			return;
-		}
 		RootConfig.INSTANCE.ITEMS_CONFIG.setMaxCount(Entry.of(tag));
 	}
 }
