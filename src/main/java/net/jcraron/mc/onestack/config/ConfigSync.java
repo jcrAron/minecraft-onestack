@@ -15,7 +15,6 @@ import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public class ConfigSync {
-	public final static ConfigSync INSTANCE = new ConfigSync();
 
 	public static record SingleConfig(String filename, byte[] data) {
 		private static void writeToBuffer(SingleConfig config, FriendlyByteBuf buffer) {
@@ -30,10 +29,14 @@ public class ConfigSync {
 		}
 	}
 
-	private final ConfigTracker tracker;
+	public final ConfigTracker tracker;
 
-	private ConfigSync() {
-		tracker = ConfigTracker.INSTANCE;
+	public ConfigSync() {
+		this(ConfigTracker.INSTANCE);
+	}
+
+	public ConfigSync(ConfigTracker tracker) {
+		this.tracker = tracker;
 	}
 
 	public void registerToChannel(SimpleChannel channel, int messageIndex) {
@@ -52,6 +55,11 @@ public class ConfigSync {
 			return new SingleConfig(config.getFileName(), bytes.toByteArray());
 		}
 		return null;
+	}
+
+	/** @param tracker ConfigTracker.INSTANCE */
+	public SingleConfig getConfig(ForgeConfigSpec spec) {
+		return getConfig(this.tracker, spec);
 	}
 
 	private void receiveSyncedConfig(SingleConfig config, Supplier<NetworkEvent.Context> contextSupplier) {

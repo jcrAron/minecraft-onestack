@@ -4,7 +4,6 @@ import net.jcraron.mc.onestack.config.RootConfig;
 import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle;
 import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle.Entry;
 import net.jcraron.mc.onestack.config.value.MaxCountValue;
-import net.minecraft.client.Minecraft;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;

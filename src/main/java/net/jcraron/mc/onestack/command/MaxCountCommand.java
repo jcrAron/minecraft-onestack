@@ -1,9 +1,9 @@
 package net.jcraron.mc.onestack.command;
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
@@ -17,21 +17,13 @@ import net.minecraft.commands.arguments.ResourceOrTagArgument.Result;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class MaxCountCommand {
-	@SubscribeEvent
-	public static void registerCommands(RegisterCommandsEvent event) {
-		MaxCountCommand.register(event.getDispatcher(), event.getBuildContext());
-	}
 
-	// maxcount set <item | tag> <default | max |<count>> <priority>
-	// maxcount unset <item | tag>
-	private static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context) {
-		dispatcher.register(Commands.literal("maxcount").requires((p_137777_) -> p_137777_.hasPermission(2))
+	public static LiteralArgumentBuilder<CommandSourceStack> createCommand(CommandBuildContext context) {
+		return Commands.literal("maxcount").requires((p_137777_) -> p_137777_.hasPermission(2))
 				.then(createSetCommand(context))
-				.then(createRemoveCommand(context)));
+				.then(createRemoveCommand(context));
 	}
 
 	private static ArgumentBuilder<CommandSourceStack, ?> createSetCommand(CommandBuildContext context) {
@@ -44,7 +36,8 @@ public class MaxCountCommand {
 						.then(Commands.literal("default")
 								.executes((c) -> setMaxCount(c, MaxCountValue.JAVA_VALUE_DEFAULT, null))
 								.then(Commands.argument("priority", IntegerArgumentType.integer())
-										.executes((c) -> setMaxCount(c, MaxCountValue.JAVA_VALUE_DEFAULT,getPriority(c)))))
+										.executes((c) -> setMaxCount(c, MaxCountValue.JAVA_VALUE_DEFAULT,
+												getPriority(c)))))
 						.then(Commands.argument("count", IntegerArgumentType.integer(1))
 								.executes((c) -> setMaxCount(c, getCount(c), null))
 								.then(Commands.argument("priority", IntegerArgumentType.integer())
