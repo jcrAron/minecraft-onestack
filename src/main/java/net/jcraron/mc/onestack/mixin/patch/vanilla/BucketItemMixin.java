@@ -18,7 +18,10 @@ public class BucketItemMixin {
 		if (!player.getAbilities().instabuild) {
 			fluidBucket.shrink(1);
 			ItemStack it = new ItemStack(Items.BUCKET);
-			if (!player.addItem(it)) {
+			if (fluidBucket.isEmpty()) {
+				info.setReturnValue(it);
+				return;
+			} else if (!player.addItem(it)) {
 				player.drop(it, false, false);
 			}
 		}
