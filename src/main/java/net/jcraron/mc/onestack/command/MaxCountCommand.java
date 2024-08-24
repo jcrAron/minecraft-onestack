@@ -23,12 +23,7 @@ public class MaxCountCommand {
 	public static LiteralArgumentBuilder<CommandSourceStack> createCommand(CommandBuildContext context) {
 		return Commands.literal("maxcount").requires((p_137777_) -> p_137777_.hasPermission(2))
 				.then(createSetCommand(context))
-				.then(createRemoveCommand(context))
-				.then(createReloadCommand(context));
-	}
-
-	private static ArgumentBuilder<CommandSourceStack, ?> createReloadCommand(CommandBuildContext context) {
-		return Commands.literal("reload").executes(MaxCountCommand::reloadConfig);
+				.then(createRemoveCommand(context));
 	}
 
 	private static ArgumentBuilder<CommandSourceStack, ?> createSetCommand(CommandBuildContext context) {
@@ -74,14 +69,6 @@ public class MaxCountCommand {
 		String message = String.format("set max count of %s to %s ", resource.asPrintable(),
 				MaxCountValue.INSTANCE.toJsonValue(count));
 		command.getSource().sendSystemMessage(Component.literal(message));
-		return Command.SINGLE_SUCCESS;
-	}
-
-	private static int reloadConfig(CommandContext<CommandSourceStack> command)
-			throws CommandSyntaxException {
-		String message = String.format("reload \"One Stack\" mod config");
-		command.getSource().sendSystemMessage(Component.literal(message));
-		MaxCountConfig.reload();
 		return Command.SINGLE_SUCCESS;
 	}
 
