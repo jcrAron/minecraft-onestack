@@ -73,4 +73,11 @@ public class MaxCountConfig {
 	public static void unset(TagKey<Item> tag) {
 		RootConfig.INSTANCE.ITEMS_CONFIG.setMaxCount(Entry.of(tag));
 	}
+
+	/**
+	 * reload config
+	 */
+	public static void reload() {
+		RootConfig.INSTANCE.reload();
+	}
 }

@@ -44,6 +44,16 @@ public class RootConfig {
 		CONFIG_SYNC.registerToChannel(CONFIG_CHANNEL, 0);
 	}
 
+	public void load() {
+		ITEMS_CONFIG.load();
+		syncToClient();
+	}
+
+	public void reload() {
+		ITEMS_CONFIG.reload();
+		syncToClient();
+	}
+
 	public void registerConfig() {
 		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ROOT_SPEC);
 	}

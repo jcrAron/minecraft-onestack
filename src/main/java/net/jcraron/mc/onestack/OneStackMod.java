@@ -32,7 +32,7 @@ public class OneStackMod {
 	public OneStackMod() {
 		RootConfig.INSTANCE.registerConfig();
 	}
-	
+
 	@Mod.EventBusSubscriber(modid = OneStackMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 	public static class ForgeEvents {
 		@SubscribeEvent
@@ -51,21 +51,18 @@ public class OneStackMod {
 			itemsRegistry.getOrCreateTag(TAG_STACKABLE).bind(list);
 		}
 	}
-	
+
 	@Mod.EventBusSubscriber(modid = OneStackMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 	public static class ModEvents {
 		@SubscribeEvent
 		public static void onLoading(final ModConfigEvent.Loading event) {
-			RootConfig.INSTANCE.ITEMS_CONFIG.load();
-			RootConfig.INSTANCE.syncToClient();
+			RootConfig.INSTANCE.load();
 		}
 
 		@SubscribeEvent
 		public static void onReload(final ModConfigEvent.Reloading event) {
-			RootConfig.INSTANCE.ITEMS_CONFIG.reload();
-			RootConfig.INSTANCE.syncToClient();
+			RootConfig.INSTANCE.reload();
 		}
 	}
-
 
 }

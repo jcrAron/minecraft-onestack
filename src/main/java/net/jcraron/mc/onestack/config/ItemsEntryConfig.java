@@ -92,6 +92,8 @@ public class ItemsEntryConfig implements ConfigHandle {
 	}
 
 	private void rawSetConfig(Entry entry, boolean save2Config) {
+		LOGGER.info("set an item entry at {} config ", OneStackMod.MODID);
+		LOGGER.info("clean {} config cache ", OneStackMod.MODID);
 		cache.clear();
 		if (entry.getValue() == null) {
 			entries.remove(entry.getKey());
@@ -101,6 +103,7 @@ public class ItemsEntryConfig implements ConfigHandle {
 		if (!save2Config) {
 			return;
 		}
+		LOGGER.info("save an item entry to {} config file", OneStackMod.MODID);
 		@SuppressWarnings("unchecked")
 		List<Config> items = (List<Config>) ITEM_LIST.get();
 		if (entry.getValue() == null) {
@@ -141,6 +144,8 @@ public class ItemsEntryConfig implements ConfigHandle {
 
 	@Override
 	public void load() {
+		LOGGER.info("loading {} config", OneStackMod.MODID);
+		LOGGER.info("clean {} config cache ", OneStackMod.MODID);
 		cache.clear();
 		entries.clear();
 		boolean hasRepeat = false;
