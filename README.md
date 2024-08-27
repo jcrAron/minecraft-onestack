@@ -20,7 +20,7 @@ priority的數字越大，優先度越高。如果沒有填入則根據item/tag�
 ```
 
 ### Config
-你也可以在配置檔案中設定堆疊上限 (1~2147483647)<br/>
+你也可以在配置檔案中設定堆疊上限 (1~2147483646)<br/>
 設置檔案在存檔目錄底下，可以在遊戲途中修改配置
 ```
 saves\<your saved>\serverconfig\onestack-server.toml
