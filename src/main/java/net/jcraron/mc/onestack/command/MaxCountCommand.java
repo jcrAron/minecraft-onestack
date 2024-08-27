@@ -45,7 +45,7 @@ public class MaxCountCommand {
 												getPriority(c)))))
 						.then(Commands.argument("count", IntegerArgumentType.integer(1))
 								.executes((c) -> setMaxCount(c, getCount(c), null))
-								.then(Commands.argument("priority", IntegerArgumentType.integer())
+								.then(Commands.argument("priority", IntegerArgumentType.integer(1, MaxCountValue.JAVA_VALUE_MAX))
 										.executes((c) -> setMaxCount(c, getCount(c), getPriority(c))))));
 	}
 

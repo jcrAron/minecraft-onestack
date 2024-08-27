@@ -4,7 +4,7 @@ public class MaxCountValue implements ValueHandle<Integer, Object> {
 	public final static MaxCountValue INSTANCE = new MaxCountValue();
 	public final static String CONFIG_VALUE_MAX = "max";
 	public final static String CONFIG_VALUE_DEFAULT = "default";
-	public final static int JAVA_VALUE_MAX = Integer.MAX_VALUE;
+	public final static int JAVA_VALUE_MAX = Integer.MAX_VALUE - 1;
 	public final static int JAVA_VALUE_DEFAULT = -1;
 	private final static int JAVA_VALUE_UNKNOWN = -2;
 
@@ -14,21 +14,21 @@ public class MaxCountValue implements ValueHandle<Integer, Object> {
 	}
 
 	@Override
-	public boolean isVaildJsonValue(Object rawValue) {
-		if (rawValue == null) {
+	public boolean isVaildJsonValue(Object jsonValue) {
+		if (jsonValue == null) {
 			return false;
 		}
-		int code = toObject(rawValue);
+		int code = toObject(jsonValue);
 		return code == JAVA_VALUE_DEFAULT || code == JAVA_VALUE_MAX || code >= 1;
 	}
 
 	@Override
-	public Integer toObject(Object rawValue) {
+	public Integer toObject(Object jsonValue) {
 		int code = JAVA_VALUE_DEFAULT;
-		if (rawValue instanceof String strValue) {
+		if (jsonValue instanceof String strValue) {
 			code = parseStringToCode(strValue);
-		} else if (rawValue instanceof Integer intValue) {
-			code = intValue;
+		} else if (jsonValue instanceof Integer intValue) {
+			code = intValue >= JAVA_VALUE_MAX ? JAVA_VALUE_MAX : intValue;
 		}
 		return code >= 1 ? code : JAVA_VALUE_DEFAULT;
 	}
@@ -56,7 +56,7 @@ public class MaxCountValue implements ValueHandle<Integer, Object> {
 		}
 		try {
 			int num = Integer.parseInt(strValue);
-			if (num == Integer.MAX_VALUE) {
+			if (num >= JAVA_VALUE_MAX) {
 				return JAVA_VALUE_MAX;
 			} else if (num >= 1) {
 				return num;
