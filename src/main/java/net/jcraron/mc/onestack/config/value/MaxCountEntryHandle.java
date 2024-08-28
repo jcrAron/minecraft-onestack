@@ -24,6 +24,11 @@ public class MaxCountEntryHandle implements ValueHandle<Entry, Config> {
 	public final static MaxCountEntryHandle INSTANCE = new MaxCountEntryHandle();
 
 	@Override
+	public boolean isVaildObject(Entry javaObject) {
+		return javaObject.getKey() != null;
+	}
+
+	@Override
 	public Entry defaultObject() {
 		return null;
 	}
@@ -114,6 +119,10 @@ public class MaxCountEntryHandle implements ValueHandle<Entry, Config> {
 		private int priority;
 
 		private EntryValue(int count, int priority) {
+			// check valid
+			if (!MaxCountValue.INSTANCE.isVaildObject(count)) {
+				throw new IllegalArgumentException("count must between 1 and " + (Integer.MAX_VALUE - 1));
+			}
 			this.count = count;
 			this.priority = priority;
 		}

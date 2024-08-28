@@ -35,7 +35,7 @@ public class MaxCountValue implements ValueHandle<Integer, Object> {
 
 	@Override
 	public Object toJsonValue(Integer object) {
-		if (!isVaildJsonValue(object)) {
+		if (!isVaildObject(object)) {
 			return defaultObject();
 		} else if (object == JAVA_VALUE_DEFAULT) {
 			return CONFIG_VALUE_DEFAULT;
@@ -44,6 +44,11 @@ public class MaxCountValue implements ValueHandle<Integer, Object> {
 		} else {
 			return object;
 		}
+	}
+
+	@Override
+	public boolean isVaildObject(Integer javaObject) {
+		return javaObject != null && javaObject >= 1 && javaObject <= Integer.MAX_VALUE - 1;
 	}
 
 	private static int parseStringToCode(String strValue) {

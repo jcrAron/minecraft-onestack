@@ -29,6 +29,10 @@ public interface ValueHandle<CLASS, JSON> {
 	public boolean isVaildJsonValue(JSON jsonValue);
 
 	/**
+	 * @param javaObject
+	 */
+	public boolean isVaildObject(CLASS javaObject);
+	/**
 	 * @param jsonValue
 	 * @return object that should be modifiable
 	 * @throws IllegalArgumentException if rawValue is invalid.
