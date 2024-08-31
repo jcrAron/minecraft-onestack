@@ -15,7 +15,8 @@
         "patch.vanilla.BucketItemMixin",
         "patch.vanilla.MilkBucketItemMixin",
         "patch.vanilla.SolidBucketItemMixin",
-        "patch.vanilla.AbstractContainerMenuMixin"
+        "patch.vanilla.AbstractContainerMenuMixin",
+        "patch.vanilla.BundleItemMixin"
     ],
     "client": [
         "core.client.GuiGraphicsMixin"
