@@ -80,4 +80,11 @@ public class MaxCountConfig {
 	public static void reload() {
 		RootConfig.INSTANCE.reload();
 	}
+
+	/**
+	 * clean cache
+	 */
+	public static void cleanCache() {
+		RootConfig.INSTANCE.ITEMS_CONFIG.cleanCache();
+	}
 }

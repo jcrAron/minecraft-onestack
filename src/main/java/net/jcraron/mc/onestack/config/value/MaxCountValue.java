@@ -39,7 +39,7 @@ public class MaxCountValue implements ValueHandle<Integer, Object> {
 			return defaultObject();
 		} else if (object == JAVA_VALUE_DEFAULT) {
 			return CONFIG_VALUE_DEFAULT;
-		} else if (object == JAVA_VALUE_MAX) {
+		} else if (object >= JAVA_VALUE_MAX) {
 			return CONFIG_VALUE_MAX;
 		} else {
 			return object;
@@ -48,7 +48,7 @@ public class MaxCountValue implements ValueHandle<Integer, Object> {
 
 	@Override
 	public boolean isVaildObject(Integer javaObject) {
-		return javaObject != null && javaObject >= 1 && javaObject <= Integer.MAX_VALUE - 1;
+		return javaObject != null && javaObject <= JAVA_VALUE_MAX;
 	}
 
 	private static int parseStringToCode(String strValue) {

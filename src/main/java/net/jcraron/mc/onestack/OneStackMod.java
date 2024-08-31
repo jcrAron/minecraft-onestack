@@ -3,8 +3,12 @@ package net.jcraron.mc.onestack;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.mojang.brigadier.CommandDispatcher;
+import org.slf4j.Logger;
 
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.logging.LogUtils;
+
+import net.jcraron.mc.onestack.api.MaxCountConfig;
 import net.jcraron.mc.onestack.command.MaxCountCommand;
 import net.jcraron.mc.onestack.config.RootConfig;
 import net.minecraft.commands.CommandBuildContext;
@@ -25,7 +29,7 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
 @Mod(OneStackMod.MODID)
 public class OneStackMod {
 	public static final String MODID = "onestack";
-//	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 
 	public final static TagKey<Item> TAG_STACKABLE = ItemTags.create(new ResourceLocation("forge", "stackable"));
 
@@ -49,6 +53,8 @@ public class OneStackMod {
 			List<Holder<Item>> list = itemsRegistry.stream().filter(item -> item.getMaxStackSize() > 1)
 					.map(Item::builtInRegistryHolder).collect(Collectors.toList());
 			itemsRegistry.getOrCreateTag(TAG_STACKABLE).bind(list);
+			LOGGER.info("added tag: {}", TAG_STACKABLE.toString());
+			MaxCountConfig.cleanCache();
 		}
 	}
 

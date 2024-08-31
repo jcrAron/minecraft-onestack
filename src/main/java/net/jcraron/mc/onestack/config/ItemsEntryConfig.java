@@ -32,6 +32,7 @@ import net.minecraftforge.common.ForgeConfigSpec.Builder;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class ItemsEntryConfig implements ConfigHandle {
@@ -44,9 +45,19 @@ public class ItemsEntryConfig implements ConfigHandle {
 	private Runnable saveFile;
 
 	public ItemsEntryConfig(Runnable saveFile) {
-		this.entries = new HashMap<>();
 		this.cache = new HashMap<>();
+		this.entries = new HashMap<>();
 		this.saveFile = saveFile;
+	}
+
+	public void cleanCache() {
+		LOGGER.info("clean {} config cache", OneStackMod.MODID);
+		cache.clear();
+	}
+
+	private void cleanEntries() {
+		LOGGER.info("clean {} config entries", OneStackMod.MODID);
+		entries.clear();
 	}
 
 	/**
@@ -55,6 +66,7 @@ public class ItemsEntryConfig implements ConfigHandle {
 	public int getMaxCount(ItemStack itemstack) {
 		Item item = itemstack.getItem();
 		Integer cacheResult = cache.get(item);
+		LOGGER.info("get max counr. item:{}, cache:{}", ForgeRegistries.ITEMS.getKey(item), cacheResult);
 		if (cacheResult != null) {
 			return cacheResult;
 		}
@@ -93,8 +105,7 @@ public class ItemsEntryConfig implements ConfigHandle {
 
 	private void rawSetConfig(Entry entry, boolean save2Config) {
 		LOGGER.info("set an item entry at {} config ", OneStackMod.MODID);
-		LOGGER.info("clean {} config cache ", OneStackMod.MODID);
-		cache.clear();
+		cleanCache();
 		if (entry.getValue() == null) {
 			entries.remove(entry.getKey());
 		} else {
@@ -144,10 +155,9 @@ public class ItemsEntryConfig implements ConfigHandle {
 
 	@Override
 	public void load() {
-		LOGGER.info("loading {} config", OneStackMod.MODID);
-		LOGGER.info("clean {} config cache ", OneStackMod.MODID);
-		cache.clear();
-		entries.clear();
+		LOGGER.info("{} config loading", OneStackMod.MODID);
+		cleanCache();
+		cleanEntries();
 		boolean hasRepeat = false;
 		@SuppressWarnings("unchecked")
 		List<Config> items = (List<Config>) ITEM_LIST.get();
@@ -164,7 +174,7 @@ public class ItemsEntryConfig implements ConfigHandle {
 		if (hasRepeat) {
 			saveFile.run();
 		}
-
+		LOGGER.info("{} config loaded", OneStackMod.MODID);
 	}
 
 	@Override

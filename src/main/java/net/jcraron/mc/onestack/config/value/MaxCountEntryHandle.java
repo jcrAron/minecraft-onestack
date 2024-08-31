@@ -121,7 +121,7 @@ public class MaxCountEntryHandle implements ValueHandle<Entry, Config> {
 		private EntryValue(int count, int priority) {
 			// check valid
 			if (!MaxCountValue.INSTANCE.isVaildObject(count)) {
-				throw new IllegalArgumentException("count must between 1 and " + (Integer.MAX_VALUE - 1));
+				throw new IllegalArgumentException("count must between 1 and " + MaxCountValue.JAVA_VALUE_MAX);
 			}
 			this.count = count;
 			this.priority = priority;
