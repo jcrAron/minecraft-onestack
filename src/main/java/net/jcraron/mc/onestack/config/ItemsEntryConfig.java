@@ -66,7 +66,6 @@ public class ItemsEntryConfig implements ConfigHandle {
 	public int getMaxCount(ItemStack itemstack) {
 		Item item = itemstack.getItem();
 		Integer cacheResult = cache.get(item);
-		LOGGER.info("get max counr. item:{}, cache:{}", ForgeRegistries.ITEMS.getKey(item), cacheResult);
 		if (cacheResult != null) {
 			return cacheResult;
 		}
