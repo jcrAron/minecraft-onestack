@@ -46,7 +46,3 @@ Server和Client都要安裝
 
 ### API
 查看[github](https://github.com/jcrAron/minecraft-onestack/tree/forge-1.20.1/src/main/java/net/jcraron/mc/onestack/api)
-
-### 已知問題
-1. 在atm9sky模組包中添加此模組，在遊戲啟動時不會自動載入設定。
-   * 可以利用```/maxcount reload```來手動載入設定
