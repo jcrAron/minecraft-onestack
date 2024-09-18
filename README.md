@@ -6,7 +6,7 @@ One Stack
 這個標籤會自動添加到原始堆疊上限為1的物品上
 
 ### Command
-你可以用指令設定每種物品的堆疊上限 (1~1073741824)<br/>
+你可以用指令設定每種物品的堆疊上限 (1~2147483646)<br/>
 priority的數字越大，優先度越高。如果沒有填入則根據item/tag來決定優先度，item預設為1000，tag預設為0
 ```
 /maxcount set <item|tag> <count|max|default> [priority]
@@ -20,7 +20,7 @@ priority的數字越大，優先度越高。如果沒有填入則根據item/tag�
 ```
 
 ### Config
-你也可以在配置檔案中設定堆疊上限 (1~1073741824)<br/>
+你也可以在配置檔案中設定堆疊上限 (1~2147483646)<br/>
 設置檔案在存檔目錄底下，可以在遊戲途中修改配置
 ```
 saves\<your saved>\serverconfig\onestack-server.toml
