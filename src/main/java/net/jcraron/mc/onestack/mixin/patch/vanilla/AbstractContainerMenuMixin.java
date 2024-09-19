@@ -51,7 +51,6 @@ public class AbstractContainerMenuMixin {
 			ordinal = 3
 			)
 	private int moveItemStackTo(int sum) {
-		System.out.println(sum);
 		return sum < 0 ? /*greater than MaxCountConfig.COUNT_MAX*/ Integer.MAX_VALUE : sum;
 	}
 }
