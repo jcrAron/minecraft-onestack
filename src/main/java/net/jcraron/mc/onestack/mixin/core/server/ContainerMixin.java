@@ -10,7 +10,7 @@ import net.minecraft.world.Container;
 public interface ContainerMixin {
 	/** 
 	 * @reason overwrite the max size in default. respect instances that override this function
-	 * @author jcraron
+	 * @author jcrAron
 	 * */
 	@Overwrite
 	default int getMaxStackSize() {
