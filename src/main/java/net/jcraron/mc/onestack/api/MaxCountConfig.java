@@ -23,11 +23,19 @@ public class MaxCountConfig {
 	public final static int COUNT_DEFAULT = MaxCountValue.JAVA_VALUE_DEFAULT;
 
 	/**
-	 * @return {@link MaxCountConfig#DEFAULT}, this represents the result of applying
-	 *         {@link Item#getMaxStackSize(ItemStack)}.
+	 * @return max count in this mod configure. If {@link MaxCountConfig#DEFAULT} is returned this means it will apply
+	 *         default value ({@link Item#getMaxStackSize(ItemStack)}).
 	 */
 	public static int getMaxCount(ItemStack itemstack) {
 		return RootConfig.INSTANCE.ITEMS_CONFIG.getMaxCount(itemstack);
+	}
+
+	/**
+	 * @return default value ({@link Item#getMaxStackSize(ItemStack)})
+	 */
+	@SuppressWarnings("deprecation")
+	public static int getDefaultMaxCount(Item item) {
+		return item.getMaxStackSize();
 	}
 
 	/**
