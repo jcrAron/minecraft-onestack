@@ -56,7 +56,6 @@ public class ItemStackMixin {
 	public void getMaxStackSize(CallbackInfoReturnable<Integer> info) {
 		int maxCount = MaxCountConfig.getMaxCount((ItemStack) (Object) this);
 		if (maxCount > 0) {
-//			info.setReturnValue(Math.max(this.count, maxCount));
 			info.setReturnValue(maxCount);
 		}
 	}
