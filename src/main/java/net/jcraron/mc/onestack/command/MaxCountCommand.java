@@ -8,7 +8,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.jcraron.mc.onestack.api.MaxCountConfig;
-import net.jcraron.mc.onestack.config.value.MaxCountValue;
+import net.jcraron.mc.onestack.config.value.CountNumberValue;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -35,16 +35,16 @@ public class MaxCountCommand {
 		return Commands.literal("set")
 				.then(Commands.argument("item", ResourceOrTagArgument.resourceOrTag(context, Registries.ITEM))
 						.then(Commands.literal("max")
-								.executes((c) -> setMaxCount(c, MaxCountValue.JAVA_VALUE_MAX, null))
+								.executes((c) -> setMaxCount(c, CountNumberValue.JAVA_VALUE_MAX, null))
 								.then(Commands.argument("priority", IntegerArgumentType.integer())
-										.executes((c) -> setMaxCount(c, MaxCountValue.JAVA_VALUE_MAX, getPriority(c)))))
+										.executes((c) -> setMaxCount(c, CountNumberValue.JAVA_VALUE_MAX, getPriority(c)))))
 						.then(Commands.literal("default")
-								.executes((c) -> setMaxCount(c, MaxCountValue.JAVA_VALUE_DEFAULT, null))
+								.executes((c) -> setMaxCount(c, CountNumberValue.JAVA_VALUE_DEFAULT, null))
 								.then(Commands.argument("priority", IntegerArgumentType.integer())
-										.executes((c) -> setMaxCount(c, MaxCountValue.JAVA_VALUE_DEFAULT, getPriority(c)))))
-						.then(Commands.argument("count", IntegerArgumentType.integer(1, MaxCountValue.JAVA_VALUE_MAX))
+										.executes((c) -> setMaxCount(c, CountNumberValue.JAVA_VALUE_DEFAULT, getPriority(c)))))
+						.then(Commands.argument("count", IntegerArgumentType.integer(1, CountNumberValue.JAVA_VALUE_MAX))
 								.executes((c) -> setMaxCount(c, getCount(c), null))
-								.then(Commands.argument("priority", IntegerArgumentType.integer(1, MaxCountValue.JAVA_VALUE_MAX))
+								.then(Commands.argument("priority", IntegerArgumentType.integer(1, CountNumberValue.JAVA_VALUE_MAX))
 										.executes((c) -> setMaxCount(c, getCount(c), getPriority(c))))));
 	}
 
@@ -71,7 +71,7 @@ public class MaxCountCommand {
 		resource.unwrap().right().ifPresent((tag) -> MaxCountConfig.set(tag.key(), count,
 				priority != null ? priority : MaxCountConfig.PRIORITY_DEFAULT_TAG));
 		String message = String.format("set max count of %s to %s ", resource.asPrintable(),
-				MaxCountValue.INSTANCE.toJsonValue(count));
+				CountNumberValue.INSTANCE.toJsonValue(count));
 		command.getSource().sendSystemMessage(Component.literal(message));
 		return Command.SINGLE_SUCCESS;
 	}

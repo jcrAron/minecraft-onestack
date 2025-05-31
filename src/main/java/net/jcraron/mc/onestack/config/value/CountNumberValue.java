@@ -1,7 +1,7 @@
 package net.jcraron.mc.onestack.config.value;
 
-public class MaxCountValue implements ValueHandle<Integer, Object> {
-	public final static MaxCountValue INSTANCE = new MaxCountValue();
+public class CountNumberValue implements ValueHandle<Integer, Object> {
+	public final static CountNumberValue INSTANCE = new CountNumberValue();
 	public final static String CONFIG_VALUE_MAX = "max";
 	public final static String CONFIG_VALUE_DEFAULT = "default";
 	public final static int JAVA_VALUE_MAX = Integer.MAX_VALUE - 1;

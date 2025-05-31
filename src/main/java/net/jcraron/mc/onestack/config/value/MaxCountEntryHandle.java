@@ -6,14 +6,14 @@ import javax.annotation.Nullable;
 
 import com.electronwill.nightconfig.core.Config;
 
-import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle.Entry;
+import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle.MaxCountEntry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class MaxCountEntryHandle implements ValueHandle<Entry, Config> {
+public class MaxCountEntryHandle implements ValueHandle<MaxCountEntry, Config> {
 
 	public static final String KEY_ITEM_NAME = "name";
 	public static final String KEY_ITEM_TAG = "tag";
@@ -24,111 +24,116 @@ public class MaxCountEntryHandle implements ValueHandle<Entry, Config> {
 	public final static MaxCountEntryHandle INSTANCE = new MaxCountEntryHandle();
 
 	@Override
-	public boolean isVaildObject(Entry javaObject) {
-		return javaObject.getKey() != null;
+	public boolean isVaildObject(MaxCountEntry javaObject) {
+		return javaObject.getItemTag() != null;
 	}
 
 	@Override
-	public Entry defaultObject() {
+	public MaxCountEntry defaultObject() {
 		return null;
 	}
 
 	@Override
 	public boolean isVaildJsonValue(Config jsonValue) {
-		if (!EntryKey.isValid(jsonValue)) {
+		if (!ItemOrTag.isValid(jsonValue)) {
 			return false;
 		}
-		if (!EntryValue.isValid(jsonValue)) {
+		if (!MaxCountValue.isValid(jsonValue)) {
 			return false;
 		}
 		return true;
 	}
 
 	@Override
-	public Entry toObject(Config jsonValue) {
+	public MaxCountEntry toObject(Config jsonValue) {
 		if (!isVaildJsonValue(jsonValue)) {
 			throw new IllegalArgumentException("invalid value: " + jsonValue.toString());
 		}
-		EntryKey key = EntryKey.createObject(jsonValue);
-		EntryValue value = EntryValue.createObject(jsonValue);
-		return new Entry(key, value);
+		ItemOrTag key = ItemOrTag.createObject(jsonValue);
+		MaxCountValue value = MaxCountValue.createObject(jsonValue);
+		return new MaxCountEntry(key, value);
 	}
 
 	@Override
-	public Config toJsonValue(Entry entry) {
+	public Config toJsonValue(MaxCountEntry maxCountEntry) {
 		Config config = Config.inMemory();
-		entry.key.serial2Config(config);
-		entry.value.serial2Config(config);
+		maxCountEntry.itemOrTag.serial2Config(config);
+		maxCountEntry.maxCountValue.serial2Config(config);
 		return config;
 	}
 
-	public final static class Entry {
-		private EntryKey key;
+	public final static class MaxCountEntry {
+		private ItemOrTag itemOrTag;
 		@Nullable
-		private EntryValue value;
+		private MaxCountValue maxCountValue;
 
-		private Entry(EntryKey key, EntryValue value) {
-			this.key = key;
-			this.value = value;
+		private MaxCountEntry(ItemOrTag key, MaxCountValue value) {
+			this.itemOrTag = key;
+			this.maxCountValue = value;
 		}
 
-		public static Entry of(Item item, int maxcount, int priority) {
-			EntryKey key = EntryKey.of(item);
-			EntryValue value = new EntryValue(maxcount, priority);
-			return new Entry(key, value);
+		public static MaxCountEntry of(Item item, int maxcount, int priority) {
+			ItemOrTag key = ItemOrTag.of(item);
+			MaxCountValue value = new MaxCountValue(maxcount, priority);
+			return new MaxCountEntry(key, value);
 		}
 
-		public static Entry of(TagKey<Item> tag, int maxcount, int priority) {
-			EntryKey key = EntryKey.of(tag);
-			EntryValue value = new EntryValue(maxcount, priority);
-			return new Entry(key, value);
+		public static MaxCountEntry of(TagKey<Item> tag, int maxcount, int priority) {
+			ItemOrTag key = ItemOrTag.of(tag);
+			MaxCountValue value = new MaxCountValue(maxcount, priority);
+			return new MaxCountEntry(key, value);
 		}
 
-		public static Entry of(Item item) {
-			return new Entry(EntryKey.of(item), null);
+		public static MaxCountEntry of(Item item) {
+			return new MaxCountEntry(ItemOrTag.of(item), null);
 		}
 
-		public static Entry of(TagKey<Item> tag) {
-			return new Entry(EntryKey.of(tag), null);
+		public static MaxCountEntry of(TagKey<Item> tag) {
+			return new MaxCountEntry(ItemOrTag.of(tag), null);
 		}
 
-		public static void writeToBuffer(Entry entry, FriendlyByteBuf buffer) {
-			EntryKey.writeToBuffer(entry.key, buffer);
-			EntryValue.writeToBuffer(entry.value, buffer);
+		public static void writeToBuffer(MaxCountEntry maxCountEntry, FriendlyByteBuf buffer) {
+			ItemOrTag.writeToBuffer(maxCountEntry.itemOrTag, buffer);
+			MaxCountValue.writeToBuffer(maxCountEntry.maxCountValue, buffer);
 		}
 
-		public static Entry readFromBuffer(FriendlyByteBuf buffer) {
-			EntryKey key = EntryKey.readFromBuffer(buffer);
-			EntryValue value = EntryValue.readFromBuffer(buffer);
-			return new Entry(key, value);
+		public static MaxCountEntry readFromBuffer(FriendlyByteBuf buffer) {
+			ItemOrTag key = ItemOrTag.readFromBuffer(buffer);
+			MaxCountValue value = MaxCountValue.readFromBuffer(buffer);
+			return new MaxCountEntry(key, value);
 		}
 
-		public EntryKey getKey() {
-			return key;
+		public ItemOrTag getItemTag() {
+			return itemOrTag;
 		}
 
 		@Nullable
-		public EntryValue getValue() {
-			return value;
+		public MaxCountValue getValue() {
+			return maxCountValue;
+		}
+
+		@Override
+		public String toString() {
+			return "MaxCountEntry [itemTag=" + itemOrTag + ", maxCount=" + maxCountValue + "]";
 		}
 
 	}
 
-	public final static class EntryValue {
+	public final static class MaxCountValue {
 		private int count;
 		private int priority;
 
-		private EntryValue(int count, int priority) {
+		private MaxCountValue(int count, int priority) {
 			// check valid
-			if (!MaxCountValue.INSTANCE.isVaildObject(count)) {
-				throw new IllegalArgumentException("count must between 1 and " + MaxCountValue.JAVA_VALUE_MAX);
+			if (!CountNumberValue.INSTANCE.isVaildObject(count)) {
+				throw new IllegalArgumentException("count must between 1 and " + CountNumberValue.JAVA_VALUE_MAX);
 			}
 			this.count = count;
 			this.priority = priority;
 		}
 
-		public EntryValue copy() {
-			return new EntryValue(count, priority);
+		public MaxCountValue copy() {
+			return new MaxCountValue(count, priority);
 		}
 
 		public int getCount() {
@@ -147,56 +152,61 @@ public class MaxCountEntryHandle implements ValueHandle<Entry, Config> {
 			this.priority = priority;
 		}
 
-		private static void writeToBuffer(EntryValue entry, FriendlyByteBuf buffer) {
-			buffer.writeBoolean(entry != null); // check the EntryValue is exist
+		private static void writeToBuffer(MaxCountValue entry, FriendlyByteBuf buffer) {
+			buffer.writeBoolean(entry != null); // check the MaxCount is exist
 			if (entry != null) {
 				buffer.writeInt(entry.count);
 				buffer.writeInt(entry.priority);
 			}
 		}
 
-		private static EntryValue readFromBuffer(FriendlyByteBuf buffer) {
+		private static MaxCountValue readFromBuffer(FriendlyByteBuf buffer) {
 			boolean isExist = buffer.readBoolean();
 			if (isExist) {
 				int count = buffer.readInt();
 				int priority = buffer.readInt();
-				return new EntryValue(count, priority);
+				return new MaxCountValue(count, priority);
 			} else {
 				return null;
 			}
 		}
 
 		private void serial2Config(Config config) {
-			config.set(KEY_MAX_COUNT, MaxCountValue.INSTANCE.toJsonValue(this.getCount()));
+			config.set(KEY_MAX_COUNT, CountNumberValue.INSTANCE.toJsonValue(this.getCount()));
 			config.set(KEY_PRIORITY, this.getPriority());
 		}
 
 		private static boolean isValid(Config config) {
-			return config.contains(KEY_MAX_COUNT) && MaxCountValue.INSTANCE.isVaildJsonValue(config.get(KEY_MAX_COUNT));
+			return config.contains(KEY_MAX_COUNT) && CountNumberValue.INSTANCE.isVaildJsonValue(config.get(KEY_MAX_COUNT));
 		}
 
-		private static EntryValue createObject(Config config) {
-			Integer maxcount = MaxCountValue.INSTANCE.toObject(config.get(KEY_MAX_COUNT));
+		private static MaxCountValue createObject(Config config) {
+			Integer maxcount = CountNumberValue.INSTANCE.toObject(config.get(KEY_MAX_COUNT));
 			int priority = config.getIntOrElse(KEY_PRIORITY, 0);
-			return new EntryValue(maxcount, priority);
+			return new MaxCountValue(maxcount, priority);
+		}
+
+		@Override
+		public String toString() {
+			return "MaxCountValue [count=" + count + ", priority=" + priority + "]";
 		}
 	}
 
-	public final static class EntryKey {
+	public final static class ItemOrTag {
 		private Type resourceType;
 		private ResourceLocation resource;
 
-		private EntryKey(Type resourceType, ResourceLocation resource) {
+		private ItemOrTag(Type resourceType, ResourceLocation resource) {
 			this.resourceType = resourceType;
 			this.resource = resource;
 		}
 
-		public static EntryKey of(Item item) {
-			return new EntryKey(Type.ITEM, ForgeRegistries.ITEMS.getKey(item));
+		public static ItemOrTag of(Item item) {
+			return new ItemOrTag(Type.ITEM, ForgeRegistries.ITEMS.getKey(item));
 		}
 
-		public static EntryKey of(TagKey<Item> tag) {
-			return new EntryKey(Type.TAG, tag.location());
+		public static ItemOrTag of(TagKey<Item> tag) {
+			return new ItemOrTag(Type.TAG, tag.location());
 		}
 
 		public Type resourceType() {
@@ -207,15 +217,15 @@ public class MaxCountEntryHandle implements ValueHandle<Entry, Config> {
 			return resource;
 		}
 
-		private static void writeToBuffer(EntryKey entry, FriendlyByteBuf buffer) {
+		private static void writeToBuffer(ItemOrTag entry, FriendlyByteBuf buffer) {
 			buffer.writeUtf(entry.resourceType.name());
 			buffer.writeUtf(entry.resource.toString());
 		}
 
-		private static EntryKey readFromBuffer(FriendlyByteBuf buffer) {
+		private static ItemOrTag readFromBuffer(FriendlyByteBuf buffer) {
 			Type resourceType = Type.valueOf(buffer.readUtf());
 			ResourceLocation resource = new ResourceLocation(buffer.readUtf());
-			return new EntryKey(resourceType, resource);
+			return new ItemOrTag(resourceType, resource);
 		}
 
 		private void serial2Config(Config config) {
@@ -226,14 +236,14 @@ public class MaxCountEntryHandle implements ValueHandle<Entry, Config> {
 			config.set(configKey, this.resource().toString());
 		}
 
-		private static EntryKey createObject(Config config) {
+		private static ItemOrTag createObject(Config config) {
 			String name = config.get(KEY_ITEM_NAME);
 			if (name != null) {
-				return new EntryKey(Type.ITEM, new ResourceLocation(name));
+				return new ItemOrTag(Type.ITEM, new ResourceLocation(name));
 			}
 			String tag = config.get(KEY_ITEM_TAG);
 			if (tag != null) {
-				return new EntryKey(Type.TAG, new ResourceLocation(tag));
+				return new ItemOrTag(Type.TAG, new ResourceLocation(tag));
 			}
 			return null;
 		}
@@ -255,8 +265,13 @@ public class MaxCountEntryHandle implements ValueHandle<Entry, Config> {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			EntryKey other = (EntryKey) obj;
+			ItemOrTag other = (ItemOrTag) obj;
 			return Objects.equals(resource, other.resource) && resourceType == other.resourceType;
+		}
+
+		@Override
+		public String toString() {
+			return "ItemOrTag [resourceType=" + resourceType + ", resource=" + resource + "]";
 		}
 	}
 

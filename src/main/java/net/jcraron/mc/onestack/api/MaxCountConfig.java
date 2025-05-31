@@ -2,8 +2,8 @@ package net.jcraron.mc.onestack.api;
 
 import net.jcraron.mc.onestack.config.RootConfig;
 import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle;
-import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle.Entry;
-import net.jcraron.mc.onestack.config.value.MaxCountValue;
+import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle.MaxCountEntry;
+import net.jcraron.mc.onestack.config.value.CountNumberValue;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -14,13 +14,13 @@ public class MaxCountConfig {
 	public final static int PRIORITY_DEFAULT_TAG = MaxCountEntryHandle.DEFAULT_PRIORITY_TAG;
 
 	/** The max count that you can config */
-	public final static int COUNT_MAX = MaxCountValue.JAVA_VALUE_MAX;
+	public final static int COUNT_MAX = CountNumberValue.JAVA_VALUE_MAX;
 
 	/**
 	 * When this value is set on configure, this represents the result of applying
 	 * {@link Item#getMaxStackSize(ItemStack)}.
 	 */
-	public final static int COUNT_DEFAULT = MaxCountValue.JAVA_VALUE_DEFAULT;
+	public final static int COUNT_DEFAULT = CountNumberValue.JAVA_VALUE_DEFAULT;
 
 	/**
 	 * @return max count in this mod configure. If {@link MaxCountConfig#DEFAULT} is returned this means it will apply
@@ -48,7 +48,7 @@ public class MaxCountConfig {
 	 * @see MaxCountConfig#set(TagKey, int, int)
 	 */
 	public static void set(Item item, int value, int priority) {
-		RootConfig.INSTANCE.ITEMS_CONFIG.setMaxCount(Entry.of(item, value, priority));
+		RootConfig.INSTANCE.ITEMS_CONFIG.setMaxCount(MaxCountEntry.of(item, value, priority));
 	}
 
 	/**
@@ -61,7 +61,7 @@ public class MaxCountConfig {
 	 * @see MaxCountConfig#set(Item, int, int)
 	 */
 	public static void set(TagKey<Item> tag, int value, int priority) {
-		RootConfig.INSTANCE.ITEMS_CONFIG.setMaxCount(Entry.of(tag, value, priority));
+		RootConfig.INSTANCE.ITEMS_CONFIG.setMaxCount(MaxCountEntry.of(tag, value, priority));
 	}
 
 	/**
@@ -70,7 +70,7 @@ public class MaxCountConfig {
 	 * @see MaxCountConfig#unset(TagKey)
 	 */
 	public static void unset(Item item) {
-		RootConfig.INSTANCE.ITEMS_CONFIG.setMaxCount(Entry.of(item));
+		RootConfig.INSTANCE.ITEMS_CONFIG.setMaxCount(MaxCountEntry.of(item));
 	}
 
 	/**
@@ -79,7 +79,7 @@ public class MaxCountConfig {
 	 * @see MaxCountConfig#unset(Item)
 	 */
 	public static void unset(TagKey<Item> tag) {
-		RootConfig.INSTANCE.ITEMS_CONFIG.setMaxCount(Entry.of(tag));
+		RootConfig.INSTANCE.ITEMS_CONFIG.setMaxCount(MaxCountEntry.of(tag));
 	}
 
 	/**

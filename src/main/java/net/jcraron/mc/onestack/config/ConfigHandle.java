@@ -7,7 +7,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 
 interface ConfigHandle {
 
-	public void registerTo(ForgeConfigSpec.Builder builder, List<String> base);
+	public void registerToSpec(ForgeConfigSpec.Builder builder, List<String> base);
 
 	public void load();
 

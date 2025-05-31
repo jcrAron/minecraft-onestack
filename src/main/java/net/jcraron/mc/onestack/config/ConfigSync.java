@@ -16,16 +16,16 @@ import net.minecraftforge.network.simple.SimpleChannel;
 
 public class ConfigSync {
 
-	public static record SingleConfig(String filename, byte[] data) {
-		private static void writeToBuffer(SingleConfig config, FriendlyByteBuf buffer) {
+	public static record ConfigFile(String filename, byte[] data) {
+		private static void writeToBuffer(ConfigFile config, FriendlyByteBuf buffer) {
 			buffer.writeUtf(config.filename());
 			buffer.writeByteArray(config.data());
 		}
 
-		private static SingleConfig readFromBuffer(FriendlyByteBuf buffer) {
+		private static ConfigFile readFromBuffer(FriendlyByteBuf buffer) {
 			String filename = buffer.readUtf();
 			byte[] bytes = buffer.readByteArray();
-			return new SingleConfig(filename, bytes);
+			return new ConfigFile(filename, bytes);
 		}
 	}
 
@@ -40,29 +40,29 @@ public class ConfigSync {
 	}
 
 	public void registerToChannel(SimpleChannel channel, int messageIndex) {
-		channel.registerMessage(messageIndex, SingleConfig.class, SingleConfig::writeToBuffer,
-				SingleConfig::readFromBuffer, this::receiveSyncedConfig);
+		channel.registerMessage(messageIndex, ConfigFile.class, ConfigFile::writeToBuffer,
+				ConfigFile::readFromBuffer, this::receiveSyncedConfig);
 	}
 
 	/** @param tracker ConfigTracker.INSTANCE */
-	public static SingleConfig getConfig(ConfigTracker tracker, ForgeConfigSpec spec) {
+	public static ConfigFile getConfig(ConfigTracker tracker, ForgeConfigSpec spec) {
 		for (ModConfig config : tracker.configSets().get(ModConfig.Type.SERVER)) {
 			if (config.getSpec() != spec) {
 				continue;
 			}
 			ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 			TomlFormat.instance().createWriter().write(config.getConfigData(), bytes);
-			return new SingleConfig(config.getFileName(), bytes.toByteArray());
+			return new ConfigFile(config.getFileName(), bytes.toByteArray());
 		}
 		return null;
 	}
 
 	/** @param tracker ConfigTracker.INSTANCE */
-	public SingleConfig getConfig(ForgeConfigSpec spec) {
+	public ConfigFile getConfig(ForgeConfigSpec spec) {
 		return getConfig(this.tracker, spec);
 	}
 
-	private void receiveSyncedConfig(SingleConfig config, Supplier<NetworkEvent.Context> contextSupplier) {
+	private void receiveSyncedConfig(ConfigFile config, Supplier<NetworkEvent.Context> contextSupplier) {
 		if (!Minecraft.getInstance().isLocalServer()) {
 			Optional.ofNullable(tracker.fileMap().get(config.filename()))
 					.ifPresent(mc -> mc.acceptSyncedConfig(config.data()));

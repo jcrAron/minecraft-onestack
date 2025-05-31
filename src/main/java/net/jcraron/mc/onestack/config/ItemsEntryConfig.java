@@ -15,11 +15,11 @@ import com.electronwill.nightconfig.core.Config;
 import com.mojang.logging.LogUtils;
 
 import net.jcraron.mc.onestack.OneStackMod;
+import net.jcraron.mc.onestack.config.value.CountNumberValue;
 import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle;
-import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle.Entry;
-import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle.EntryKey;
-import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle.EntryValue;
-import net.jcraron.mc.onestack.config.value.MaxCountValue;
+import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle.ItemTag;
+import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle.MaxCount;
+import net.jcraron.mc.onestack.config.value.MaxCountEntryHandle.MaxCountEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,7 +32,6 @@ import net.minecraftforge.common.ForgeConfigSpec.Builder;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class ItemsEntryConfig implements ConfigHandle {
@@ -40,7 +39,7 @@ public class ItemsEntryConfig implements ConfigHandle {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private ForgeConfigSpec.ConfigValue<List<? extends Config>> ITEM_LIST;
 	private Map<Item, Integer> cache;
-	private Map<EntryKey, EntryValue> entries;
+	private Map<ItemTag, MaxCount> entries;
 	private SimpleChannel channel;
 	private Runnable saveFile;
 
@@ -69,11 +68,11 @@ public class ItemsEntryConfig implements ConfigHandle {
 		if (cacheResult != null) {
 			return cacheResult;
 		}
-		EntryValue itemValue = entries.get(EntryKey.of(item));
-		EntryValue tagValue = itemstack.getTags()
-				.map(EntryKey::of).filter(entries::containsKey).map(entries::get)
+		MaxCount itemValue = entries.get(ItemTag.of(item));
+		MaxCount tagValue = itemstack.getTags()
+				.map(ItemTag::of).filter(entries::containsKey).map(entries::get)
 				.max((v1, v2) -> Integer.compare(v1.getPriority(), v2.getPriority())).orElse(null);
-		int result = MaxCountValue.JAVA_VALUE_DEFAULT;
+		int result = CountNumberValue.JAVA_VALUE_DEFAULT;
 		if (itemValue != null && tagValue != null) {
 			result = itemValue.getPriority() > tagValue.getPriority() ? itemValue.getCount() : tagValue.getCount();
 		} else if (itemValue != null ^ tagValue != null) {
@@ -83,13 +82,13 @@ public class ItemsEntryConfig implements ConfigHandle {
 		return result;
 	}
 
-	public void setMaxCount(Entry entry) {
+	public void setMaxCount(MaxCountEntry maxCountEntry) {
 		Minecraft minecraft = Minecraft.getInstance();
 		if (!minecraft.isLocalServer()) {
 			LOGGER.info("send MaxCountEntry config to server");
-			channel.sendToServer(entry);
+			channel.sendToServer(maxCountEntry);
 		} else {
-			rawSetConfig(entry, minecraft.isLocalServer());
+			rawSetConfig(maxCountEntry, minecraft.isLocalServer());
 			LOGGER.info("send MaxCountEntry config to client");
 			UUID localPlayerUUID = Optional.ofNullable(minecraft.player).map(LocalPlayer::getUUID).orElse(null);
 			for (ServerPlayer serverPlayer : ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers()) {
@@ -97,18 +96,18 @@ public class ItemsEntryConfig implements ConfigHandle {
 					continue;
 				}
 				LOGGER.info("sync MaxCountEntry config to player: {}", serverPlayer.getDisplayName());
-				channel.send(PacketDistributor.PLAYER.with(() -> serverPlayer), entry);
+				channel.send(PacketDistributor.PLAYER.with(() -> serverPlayer), maxCountEntry);
 			}
 		}
 	}
 
-	private void rawSetConfig(Entry entry, boolean save2Config) {
-		LOGGER.info("set an item entry at {} config ", OneStackMod.MODID);
+	private void rawSetConfig(MaxCountEntry maxCountEntry, boolean save2Config) {
+		LOGGER.info("set an {} at {} config ", maxCountEntry.getItemTag(), OneStackMod.MODID);
 		cleanCache();
-		if (entry.getValue() == null) {
-			entries.remove(entry.getKey());
+		if (maxCountEntry.getValue() == null) {
+			entries.remove(maxCountEntry.getItemTag());
 		} else {
-			entries.put(entry.getKey(), entry.getValue());
+			entries.put(maxCountEntry.getItemTag(), maxCountEntry.getValue());
 		}
 		if (!save2Config) {
 			return;
@@ -116,14 +115,16 @@ public class ItemsEntryConfig implements ConfigHandle {
 		LOGGER.info("save an item entry to {} config file", OneStackMod.MODID);
 		@SuppressWarnings("unchecked")
 		List<Config> items = (List<Config>) ITEM_LIST.get();
-		if (entry.getValue() == null) {
-			items.removeIf((config) -> MaxCountEntryHandle.INSTANCE.toObject(config).getKey().equals(entry.getKey()));
+		if (maxCountEntry.getValue() == null) {
+			items.removeIf(
+					(config) -> MaxCountEntryHandle.INSTANCE.toObject(config).getItemTag()
+							.equals(maxCountEntry.getItemTag()));
 		} else {
 			boolean replace = false;
-			Config newConfig = MaxCountEntryHandle.INSTANCE.toJsonValue(entry);
+			Config newConfig = MaxCountEntryHandle.INSTANCE.toJsonValue(maxCountEntry);
 			for (Iterator<Config> it = items.iterator(); it.hasNext();) {
 				Config config = it.next();
-				if (!MaxCountEntryHandle.INSTANCE.toObject(config).getKey().equals(entry.getKey())) {
+				if (!MaxCountEntryHandle.INSTANCE.toObject(config).getItemTag().equals(maxCountEntry.getItemTag())) {
 					continue;
 				}
 				if (!replace) {
@@ -144,7 +145,7 @@ public class ItemsEntryConfig implements ConfigHandle {
 	@Override
 	public void registerTo(Builder builder, List<String> path) {
 		String key_maxcount = String.format("%s can be \"max\" or \"default\" or positive integer (1~%d)",
-				MaxCountEntryHandle.KEY_MAX_COUNT, MaxCountValue.JAVA_VALUE_MAX);
+				MaxCountEntryHandle.KEY_MAX_COUNT, CountNumberValue.JAVA_VALUE_MAX);
 		String key_priority = String.format("The larger the number \"priority\", the higher the priority.",
 				MaxCountEntryHandle.KEY_PRIORITY);
 		ITEM_LIST = builder.comment(key_maxcount, key_priority).defineListAllowEmpty(path,
@@ -162,12 +163,12 @@ public class ItemsEntryConfig implements ConfigHandle {
 		List<Config> items = (List<Config>) ITEM_LIST.get();
 		for (Iterator<Config> it = items.iterator(); it.hasNext();) {
 			Config config = it.next();
-			Entry entry = MaxCountEntryHandle.INSTANCE.toObject(config);
-			if (entries.containsKey(entry.getKey())) {
+			MaxCountEntry maxCountEntry = MaxCountEntryHandle.INSTANCE.toObject(config);
+			if (entries.containsKey(maxCountEntry.getItemTag())) {
 				it.remove();
 				hasRepeat = true;
 			} else {
-				rawSetConfig(entry, false);
+				rawSetConfig(maxCountEntry, false);
 			}
 		}
 		if (hasRepeat) {
@@ -183,24 +184,24 @@ public class ItemsEntryConfig implements ConfigHandle {
 
 	private static List<Config> createDefaultItemList() {
 		List<Config> list = new ArrayList<>();
-		list.add(createItemConfig(OneStackMod.TAG_STACKABLE, MaxCountValue.CONFIG_VALUE_DEFAULT));
-		list.add(createItemConfig(Items.POTION, MaxCountValue.CONFIG_VALUE_MAX));
-		list.add(createItemConfig(Items.LINGERING_POTION, MaxCountValue.CONFIG_VALUE_MAX));
-		list.add(createItemConfig(Items.SPLASH_POTION, MaxCountValue.CONFIG_VALUE_MAX));
-		list.add(createItemConfig(Items.MUSHROOM_STEW, MaxCountValue.CONFIG_VALUE_MAX));
+		list.add(createItemConfig(OneStackMod.TAG_STACKABLE, CountNumberValue.CONFIG_VALUE_DEFAULT));
+		list.add(createItemConfig(Items.POTION, CountNumberValue.CONFIG_VALUE_MAX));
+		list.add(createItemConfig(Items.LINGERING_POTION, CountNumberValue.CONFIG_VALUE_MAX));
+		list.add(createItemConfig(Items.SPLASH_POTION, CountNumberValue.CONFIG_VALUE_MAX));
+		list.add(createItemConfig(Items.MUSHROOM_STEW, CountNumberValue.CONFIG_VALUE_MAX));
 		return list;
 	}
 
 	private static Config createItemConfig(Item item, Object jsonMaxCount) {
-		Entry entry = Entry.of(item, MaxCountValue.INSTANCE.toObject(jsonMaxCount),
+		MaxCountEntry maxCountEntry = MaxCountEntry.of(item, CountNumberValue.INSTANCE.toObject(jsonMaxCount),
 				MaxCountEntryHandle.DEFAULT_PRIORITY_ITEM);
-		return MaxCountEntryHandle.INSTANCE.toJsonValue(entry);
+		return MaxCountEntryHandle.INSTANCE.toJsonValue(maxCountEntry);
 	}
 
 	private static Config createItemConfig(TagKey<Item> tag, Object jsonMaxCount) {
-		Entry entry = Entry.of(tag, MaxCountValue.INSTANCE.toObject(jsonMaxCount),
+		MaxCountEntry maxCountEntry = MaxCountEntry.of(tag, CountNumberValue.INSTANCE.toObject(jsonMaxCount),
 				MaxCountEntryHandle.DEFAULT_PRIORITY_TAG);
-		return MaxCountEntryHandle.INSTANCE.toJsonValue(entry);
+		return MaxCountEntryHandle.INSTANCE.toJsonValue(maxCountEntry);
 	}
 
 	private static boolean validator(Object object) {
@@ -211,17 +212,18 @@ public class ItemsEntryConfig implements ConfigHandle {
 	}
 
 	public void registerToChannel(SimpleChannel channel, int messageIndex) {
-		channel.registerMessage(messageIndex, Entry.class, Entry::writeToBuffer, Entry::readFromBuffer, this::receive);
+		channel.registerMessage(messageIndex, MaxCountEntry.class, MaxCountEntry::writeToBuffer,
+				MaxCountEntry::readFromBuffer, this::receive);
 		this.channel = channel;
 	}
 
-	private void receive(Entry entry, Supplier<NetworkEvent.Context> contextSupplier) {
+	private void receive(MaxCountEntry maxCountEntry, Supplier<NetworkEvent.Context> contextSupplier) {
 		Minecraft minecraft = Minecraft.getInstance();
 		if (minecraft.isLocalServer()) {
 			LOGGER.info("received new entry from client");
-			setMaxCount(entry);
+			setMaxCount(maxCountEntry);
 		} else {
-			rawSetConfig(entry, minecraft.isLocalServer());
+			rawSetConfig(maxCountEntry, minecraft.isLocalServer());
 		}
 		contextSupplier.get().setPacketHandled(true);
 	}
