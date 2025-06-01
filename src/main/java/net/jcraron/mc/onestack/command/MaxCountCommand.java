@@ -7,7 +7,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.jcraron.mc.onestack.api.MaxCountConfig;
+import net.jcraron.mc.onestack.api.OneStackConfig;
 import net.jcraron.mc.onestack.config.value.CountNumberValue;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -56,8 +56,8 @@ public class MaxCountCommand {
 
 	private static int unsetMaxCount(CommandContext<CommandSourceStack> command) throws CommandSyntaxException {
 		Result<Item> resource = ResourceOrTagArgument.getResourceOrTag(command, "item", Registries.ITEM);
-		resource.unwrap().left().ifPresent((item) -> MaxCountConfig.unset(item.get()));
-		resource.unwrap().right().ifPresent((tag) -> MaxCountConfig.unset(tag.key()));
+		resource.unwrap().left().ifPresent((item) -> OneStackConfig.unset(item.get()));
+		resource.unwrap().right().ifPresent((tag) -> OneStackConfig.unset(tag.key()));
 		String message = String.format("unset max count of %s", resource.asPrintable());
 		command.getSource().sendSystemMessage(Component.literal(message));
 		return Command.SINGLE_SUCCESS;
@@ -66,10 +66,10 @@ public class MaxCountCommand {
 	private static int setMaxCount(CommandContext<CommandSourceStack> command, int count, Integer priority)
 			throws CommandSyntaxException {
 		Result<Item> resource = ResourceOrTagArgument.getResourceOrTag(command, "item", Registries.ITEM);
-		resource.unwrap().left().ifPresent((item) -> MaxCountConfig.set(item.get(), count,
-				priority != null ? priority : MaxCountConfig.PRIORITY_DEFAULT_ITEM));
-		resource.unwrap().right().ifPresent((tag) -> MaxCountConfig.set(tag.key(), count,
-				priority != null ? priority : MaxCountConfig.PRIORITY_DEFAULT_TAG));
+		resource.unwrap().left().ifPresent((item) -> OneStackConfig.set(item.get(), count,
+				priority != null ? priority : OneStackConfig.PRIORITY_DEFAULT_ITEM));
+		resource.unwrap().right().ifPresent((tag) -> OneStackConfig.set(tag.key(), count,
+				priority != null ? priority : OneStackConfig.PRIORITY_DEFAULT_TAG));
 		String message = String.format("set max count of %s to %s ", resource.asPrintable(),
 				CountNumberValue.INSTANCE.toJsonValue(count));
 		command.getSource().sendSystemMessage(Component.literal(message));
@@ -80,7 +80,7 @@ public class MaxCountCommand {
 			throws CommandSyntaxException {
 		String message = String.format("reload \"One Stack\" mod config");
 		command.getSource().sendSystemMessage(Component.literal(message));
-		MaxCountConfig.reload();
+		OneStackConfig.reload();
 		return Command.SINGLE_SUCCESS;
 	}
 

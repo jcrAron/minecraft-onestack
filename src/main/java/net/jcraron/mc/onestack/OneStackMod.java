@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
 
-import net.jcraron.mc.onestack.api.MaxCountConfig;
+import net.jcraron.mc.onestack.api.OneStackConfig;
 import net.jcraron.mc.onestack.command.MaxCountCommand;
 import net.jcraron.mc.onestack.config.RootConfig;
 import net.minecraft.commands.CommandBuildContext;
@@ -54,7 +54,7 @@ public class OneStackMod {
 					.map(Item::builtInRegistryHolder).collect(Collectors.toList());
 			itemsRegistry.getOrCreateTag(TAG_STACKABLE).bind(list);
 			LOGGER.info("added tag: {}", TAG_STACKABLE.toString());
-			MaxCountConfig.cleanCache();
+			OneStackConfig.cleanCache();
 		}
 	}
 
