@@ -10,9 +10,10 @@ One Stack
 priority的數字越大，優先度越高。如果沒有填入則根據item/tag來決定優先度，item預設為1000，tag預設為0
 ```
 /maxcount set <item|tag> <count|max|default> [priority]
-```
-```
 /maxcount unset <item|tag>
+/maxcount reload
+```
+```
 /maxcount set minecraft:copper_ingot 999
 /maxcount set minecraft:iron_ingot default
 /maxcount set #forge:stackable max 
