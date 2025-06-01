@@ -15,6 +15,3 @@ _No response_
 
 ### latest.log
 _No response_
-
-### Developer reports
-_No response_
